@@ -1,0 +1,42 @@
+---
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+rules:
+  # Broker topic metrics like bytes in/out, messages in, etc.
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=(BytesInPerSec|BytesOutPerSec|MessagesInPerSec)><>(OneMinuteRate|Count)
+    name: kafka_broker_$1
+    type: GAUGE
+    labels:
+      topic: "$1"
+
+  # Detailed topic and partition metrics for Bytes In/Out
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=(BytesInPerSec|BytesOutPerSec), topic=(.+), partition=(.*)><>(OneMinuteRate|Count)
+    name: kafka_topic_$1
+    type: GAUGE
+    labels:
+      topic: "$2"
+      partition: "$3"
+
+  # Kafka network request metrics
+  - pattern: kafka.network<type=RequestMetrics, name=RequestsPerSec, request=(Produce|FetchConsumer|FetchFollower)><>(OneMinuteRate|Count)
+    name: kafka_network_$1_requests
+    type: GAUGE
+    labels:
+      request_type: "$1"
+
+  # Kafka server log flush rate and time
+  - pattern: kafka.log<type=LogFlushStats, name=LogFlushRateAndTimeMs><>(OneMinuteRate|Count)
+    name: kafka_log_flush_rate_time
+    type: GAUGE
+
+  # JVM memory metrics
+  - pattern: java.lang<type=Memory><HeapMemoryUsage>(used|committed|max)
+    name: jvm_memory_heap_$1
+    type: GAUGE
+
+  # JVM garbage collection metrics
+  - pattern: java.lang<type=GarbageCollector, name=(.+)><>(CollectionCount|CollectionTime)
+    name: jvm_gc_$1
+    type: COUNTER
+    labels:
+      gc_name: "$1"
