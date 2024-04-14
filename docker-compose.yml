@@ -1,4 +1,4 @@
-version: '2.4'  # Using version 2.4 to utilize healthcheck capabilities
+version: '3.8'  # Using version 3.8 for better networking capabilities
 
 services:
   zookeeper:
@@ -9,29 +9,30 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
       - zookeeper_data:/bitnami/zookeeper
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    networks:
+      - kafka-net
 
   kafka:
     image: bitnami/kafka:latest
     ports:
       - "9092:9092"
     depends_on:
-      zookeeper:
-        condition: service_healthy
+      - zookeeper
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181  # Make sure this matches the internal port, not the mapped one
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
     volumes:
       - kafka_data:/bitnami/kafka
-
+    networks:
+      - kafka-net
 
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
     driver: local
+
+networks:
+  kafka-net:
+    driver: bridge
