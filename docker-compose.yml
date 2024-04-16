@@ -11,6 +11,11 @@ services:
       - zookeeper_data:/bitnami/zookeeper
     networks:
       - kafka-net
+    healthcheck:
+      test: [ "CMD", "echo", "ruok", "|", "nc", "localhost", "2181" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   kafka:
     build: .
@@ -28,6 +33,11 @@ services:
       - kafka_data:/bitnami/kafka
     networks:
       - kafka-net
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   prometheus:
     image: prom/prometheus
@@ -40,6 +50,11 @@ services:
       - kafka-net
     depends_on:
       - kafka
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   grafana:
     image: grafana/grafana
@@ -51,6 +66,11 @@ services:
       - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   zookeeper_data:
