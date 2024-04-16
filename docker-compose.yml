@@ -4,7 +4,7 @@ services:
   zookeeper:
     image: bitnami/zookeeper:latest
     ports:
-      - "2182:2181"
+      - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
@@ -21,7 +21,7 @@ services:
       - zookeeper
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_OPTS=-javaagent:/usr/app/jmx_prometheus_javaagent.jar=7071:/usr/app/kafka-jmx-exporter-config.yml
     volumes:
@@ -33,6 +33,7 @@ services:
     image: prom/prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     ports:
       - "9090:9090"
     networks:
@@ -48,11 +49,17 @@ services:
       - kafka-net
     depends_on:
       - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
 
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
 
 networks:
