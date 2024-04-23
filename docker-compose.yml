@@ -26,10 +26,10 @@ services:
       retries: 3
 
   kafka:
-    image: bitnami/kafka:2.8.0
+    build: .
     ports:
       - "9092:9092"
-      - "7071:7071"
+      - "7071:7071" # JMX exporter port
     depends_on:
       - zookeeper
     environment:

@@ -1,4 +1,4 @@
-FROM bitnami/kafka:latest
+FROM bitnami/kafka:2.8.0
 
 # Download the JMX exporter
 USER root
